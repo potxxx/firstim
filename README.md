@@ -38,7 +38,7 @@ id[自增ID]、group_id[群ID]、state[群状态]
 #### 群用户关系表
 id[自增ID]、group_id[群ID]、user_id[用户ID]
 #### 推送消息表
-msg_id[自增消息ID]、msg_from[发送者userid]、msg_to[接收者userid]、msg_type[消息类型]、delivered[是否送达]、msg_cid[用户会话消息id]、msg_content[消息内容]
+id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者userid]、msg_type[消息类型]、group_id[群ID]、delivered[是否送达]、msg_cid[用户会话消息id]、msg_content[消息内容]
 
 ##五、技术方案设计
 1. 长连接服务采用netty编写：通信协议自定义私有协议，序列化采用protobuf，协议支持客户端心跳检测与断线重连，服务端若长时间无心跳则自动断连
@@ -46,6 +46,8 @@ msg_id[自增消息ID]、msg_from[发送者userid]、msg_to[接收者userid]、m
 3. 消息不丢失不重复保证：客户端维持一个ack队列未ack消息超时重发，消息发送带上本次消息的cid以及本次会话上次消息的preid，接收服务器检查preid是否与已接收到的最大cid相同，若相同则说明接收到顺序消息，若不同则判断是否已接收，返回一个服务端最大的cid
 4. 负载均衡设计：TCPGateWayServer的分配采用hash一致性算法，当某一个gate宕机，客户端心跳机制会重新进行连接，当新加入一个gate服务后，控制的gate服务主动断开需要rehash的长连接并给这些连接下发重新连接的命令，同时这些客户端也会通过心跳机制进行重连
 5. 消息表水平分库与索引：按照msg_to进行hash，查询频繁的功能有：查询msg_from、msg_to的最大msg_cid---建立这三个列的复合索引、查询msg_to且大于msg_id的所有消息---建立这两个列的复合索引
+6. 由于分库导致msg_id不能全局递增，需要设计一个分布式递增id服务  
+7. redis路由---uid，gateServerIp
 ##六、功能开发
 * [ ] 项目架构搭建 
 * [ ] 私有通讯协议实现---心跳、重连、序列化、拆包解包
@@ -55,6 +57,12 @@ msg_id[自增消息ID]、msg_from[发送者userid]、msg_to[接收者userid]、m
 * [ ] 下行消息逻辑---拉取接口设计
 * [ ] 一致性hash负载均衡长连接上线下线实现
 
-
-
 ##七、技术细节
+1. 自定义协议设计
+>1.协议头设计---magicCode[魔数-4字节]、type[消息类型-4字节]、bodyLength[消息体长度-4字节]---magicCode固定为0xFAFAFAFA、type 0x01[心跳] 0x02[单聊] 0x03[群聊] 0x04[推送控制消息] 0x04[拉消息]  
+>2.协议体设计  
+> 心跳消息 消息体为空  
+> 单聊 C2CSendRequest[from、to、preId---当前发送的cid的上一个id、cid、content] C2CSendResponse[from、to、ackid---当前已落库的cid]  
+> 群聊 C2GSendRequest[from,group,preId---当前发送的cid的上一个id、cid、content] C2CSendResponse[preid---当前已落库的cid]  
+> 推送控制消息 消息体为空  
+> 拉取消息 PullRequest[uid,msgId--本地收到的最大消息id--该id之前的消息已全接收] PullResponse[msgList消息数组--from、to、msgType、msgId、content]
