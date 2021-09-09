@@ -2,6 +2,7 @@ package com.potxxx.firstim.tcpGate;
 
 import com.potxxx.firstim.message.MessageCoder;
 import com.potxxx.firstim.message.MessageLengthFieldFrameDecoder;
+import com.potxxx.firstim.messageHandler.C2CSendRequestHandler;
 import com.potxxx.firstim.messageHandler.PingHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -50,7 +51,8 @@ public class TcpGateServer {
                                 .addLast(new IdleStateHandler(readerIdleTimeSeconds,0,0))
                                 .addLast(new MessageLengthFieldFrameDecoder())
                                 .addLast(new MessageCoder())
-                                .addLast(new PingHandler());
+                                .addLast(new PingHandler())
+                                .addLast(new C2CSendRequestHandler());
                     }
                 });
         try {

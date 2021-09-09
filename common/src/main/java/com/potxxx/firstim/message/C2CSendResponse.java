@@ -9,13 +9,19 @@ import lombok.extern.slf4j.Slf4j;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Slf4j
 public class C2CSendResponse extends Message{
 
     String from;
     String to;
     String ackId;
+
+    public C2CSendResponse(String from,String to,String ackId){
+        messageType = C2CSENDRESPONSE;
+        this.from = from;
+        this.to = to;
+        this.ackId = ackId;
+    }
 
     public static C2CSendResponse parseFrom(byte[] bytes) {
         try {

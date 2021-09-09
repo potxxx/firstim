@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Slf4j
 public class C2CSendRequest extends Message{
 
@@ -18,6 +17,15 @@ public class C2CSendRequest extends Message{
     String preId;
     String cId;
     String content;
+
+    public C2CSendRequest(String from,String to,String preId,String cId,String content){
+        messageType = C2CSENDREQUEST;
+        this.from = from;
+        this.to = to;
+        this.preId = preId;
+        this.cId = cId;
+        this.content = content;
+    }
 
     public static C2CSendRequest parseFrom(byte[] bytes) {
         try {
