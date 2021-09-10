@@ -16,6 +16,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.internal.logging.InternalLogLevel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,13 +26,12 @@ import javax.annotation.PostConstruct;
 @Component
 public class TcpClient {
 
-    private String tcpGateAddr;
     private NioEventLoopGroup group = new NioEventLoopGroup();
     private Channel channel;
     private Bootstrap bootstrap;
 
     @Value("${clienttotcpgate.port}")
-    private int tcpGatePort;
+    private int clienttcpGatePort;
 
     @Value("${client.allIdleTimeSeconds}")
     private int allIdleTimeSeconds;
@@ -39,13 +39,25 @@ public class TcpClient {
     @Value("${client.Retry}")
     private int clientRetry;
 
+    @Value("${client.useId}")
+    private String clientUseId;
+
     private int retryCnt = 0;
+
+    private String tcpGateIp;
+
+    private int tcpGatePort;
+
+    @Autowired
+    IpConfigClient ipConfigClient;
 
     @PostConstruct
     public void start() {
 
         //1、获取TCPGate服务地址
-        tcpGateAddr = "127.0.0.1:9091";
+        String[] temp = ipConfigClient.getTcpGateAdd(clientUseId).split(":");
+        tcpGateIp = temp[0];
+        tcpGatePort = Integer.parseInt(temp[1]);
         //2、与TCPGate建立长连接
         connectToTCPGate();
 
@@ -65,7 +77,7 @@ public class TcpClient {
                 .option(ChannelOption.TCP_NODELAY,true)
                 .option(ChannelOption.SO_KEEPALIVE,true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,30000)
-//                .localAddress(tcpGatePort)
+//                .localAddress(clienttcpGatePort)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -79,7 +91,7 @@ public class TcpClient {
                     }
                 });
         retryCnt = 0;
-        bootstrap.connect("127.0.0.1",9091).addListener((ChannelFuture f)->{
+        bootstrap.connect(tcpGateIp,tcpGatePort).addListener((ChannelFuture f)->{
             if(f.isSuccess()){
                 channel = f.channel();
                 retryCnt = 0;

@@ -6,21 +6,21 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @Slf4j
+@EnableFeignClients
 @SpringBootApplication
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 public class ClientApplication {
     public static void main(String[] args) throws UnknownHostException {
-        SpringApplication.run(ClientApplication.class);
+        SpringApplication.run(ClientApplication.class,args);
         String localaddr = InetAddress.getLocalHost().getHostAddress();
         log.info("----client启动成功 {}----",localaddr);
 
     }
-
-
 
 }
