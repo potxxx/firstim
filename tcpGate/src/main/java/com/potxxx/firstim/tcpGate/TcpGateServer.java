@@ -55,19 +55,13 @@ public class TcpGateServer {
                                 .addLast(new C2CSendRequestHandler());
                     }
                 });
-        try {
-            serverBootstrap.bind(nettyPort).sync().addListener((f)->{
+            serverBootstrap.bind(nettyPort).addListener((f)->{
                 if(f.isSuccess()){
                     log.info("----tcpGateServer启动成功----");
                 }else{
                     log.error("----tcpGateServer启动失败 {}----",f.cause().getCause().toString());
                 }
             });
-        } catch (InterruptedException e) {
-            log.error("----tcpGateServer启动失败 {}----",e.getCause().toString());
-
-        }
-
     }
 
     @PreDestroy

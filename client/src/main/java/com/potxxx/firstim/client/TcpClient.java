@@ -1,13 +1,11 @@
 package com.potxxx.firstim.client;
 
-import com.potxxx.firstim.message.C2CSendRequest;
-import com.potxxx.firstim.message.MessageCoder;
-import com.potxxx.firstim.message.MessageLengthFieldFrameDecoder;
-import com.potxxx.firstim.message.Ping;
+import com.potxxx.firstim.message.*;
 import com.potxxx.firstim.messageHandler.C2CSendResponseHandler;
 import com.potxxx.firstim.messageHandler.HeartBeatHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -38,6 +36,11 @@ public class TcpClient {
     @Value("${client.allIdleTimeSeconds}")
     private int allIdleTimeSeconds;
 
+    @Value("${client.Retry}")
+    private int clientRetry;
+
+    private int retryCnt = 0;
+
     @PostConstruct
     public void start() {
 
@@ -46,11 +49,12 @@ public class TcpClient {
         //2、与TCPGate建立长连接
         connectToTCPGate();
 
-        sendMsg();
     }
 
-    public void sendMsg(){
-        channel.writeAndFlush(new C2CSendRequest("xxw","xzx","12","13","hello"));
+    public void sendMsg(Message message){
+        tryReconnect();
+//        C2CSendRequest c2crequest = new C2CSendRequest("xxw", "xzx", "12", "13", "hello");
+        channel.writeAndFlush(message);
     }
 
     void connectToTCPGate(){
@@ -60,6 +64,7 @@ public class TcpClient {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY,true)
                 .option(ChannelOption.SO_KEEPALIVE,true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,30000)
 //                .localAddress(tcpGatePort)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -71,20 +76,37 @@ public class TcpClient {
                                 .addLast(new MessageCoder())
                                 .addLast(new HeartBeatHandler())
                                 .addLast(new C2CSendResponseHandler());
-
-
                     }
                 });
-        try {
-            channel = bootstrap.connect("127.0.0.1",9091).sync().channel();
-        } catch (InterruptedException e) {
-            log.info("连接发生异常{}",e.toString());
-        }
-
+        retryCnt = 0;
+        bootstrap.connect("127.0.0.1",9091).addListener((ChannelFuture f)->{
+            if(f.isSuccess()){
+                channel = f.channel();
+                retryCnt = 0;
+                log.info("连接成功");
+            }else{
+                if(retryCnt > clientRetry){
+                    log.info("连接重试超过3次，请稍后重试");
+                    return;
+                }
+                retryCnt++;
+                connectToTCPGate();
+            }
+        });
     }
 
-    void reconnect(){
+    void tryReconnect(){
+        if(channel != null&&channel.isActive()){
+            return;
+        }
+        log.info("已断开连接，尝试重新建立连接，请稍等...");
+        start();
+    }
 
+    void close(){
+        if(channel != null){
+            channel.close();
+        }
     }
 
 
