@@ -14,7 +14,7 @@ public class C2CSendResponse extends Message{
 
     String from;
     String to;
-    String ackId;
+    String ackId;   //error为ack失败，否则为已成功接受的消息cid
 
     public C2CSendResponse(String from,String to,String ackId){
         messageType = C2CSENDRESPONSE;

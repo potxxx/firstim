@@ -15,3 +15,13 @@ message c2c_send_response_proto {
   string to = 3;
   string ackId = 4;
 }
+
+message login_proto {
+  int32 messageType = 1;
+  string useId = 2;
+}
+
+message logout_proto {
+  int32 messageType = 1;
+  string useId = 2;
+}

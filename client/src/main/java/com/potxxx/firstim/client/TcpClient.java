@@ -60,12 +60,17 @@ public class TcpClient {
         tcpGatePort = Integer.parseInt(temp[1]);
         //2、与TCPGate建立长连接
         connectToTCPGate();
+        //3、登录TCPGate
+        loginTcpGate();
+        sendMsg(new C2CSendRequest("1","2","xs","cas","hello"));
+    }
 
+    public void loginTcpGate(){
+        sendMsg(new Login(clientUseId));
     }
 
     public void sendMsg(Message message){
         tryReconnect();
-//        C2CSendRequest c2crequest = new C2CSendRequest("xxw", "xzx", "12", "13", "hello");
         channel.writeAndFlush(message);
     }
 
