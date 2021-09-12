@@ -47,28 +47,16 @@ public final class MessageProto {
         getToBytes();
 
     /**
-     * <code>string preId = 4;</code>
+     * <code>int64 preId = 4;</code>
      * @return The preId.
      */
-    java.lang.String getPreId();
-    /**
-     * <code>string preId = 4;</code>
-     * @return The bytes for preId.
-     */
-    com.google.protobuf.ByteString
-        getPreIdBytes();
+    long getPreId();
 
     /**
-     * <code>string cId = 5;</code>
+     * <code>int64 cId = 5;</code>
      * @return The cId.
      */
-    java.lang.String getCId();
-    /**
-     * <code>string cId = 5;</code>
-     * @return The bytes for cId.
-     */
-    com.google.protobuf.ByteString
-        getCIdBytes();
+    long getCId();
 
     /**
      * <code>string content = 6;</code>
@@ -97,8 +85,6 @@ public final class MessageProto {
     private c2c_send_request_proto() {
       from_ = "";
       to_ = "";
-      preId_ = "";
-      cId_ = "";
       content_ = "";
     }
 
@@ -149,16 +135,14 @@ public final class MessageProto {
               to_ = s;
               break;
             }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 32: {
 
-              preId_ = s;
+              preId_ = input.readInt64();
               break;
             }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 40: {
 
-              cId_ = s;
+              cId_ = input.readInt64();
               break;
             }
             case 50: {
@@ -287,79 +271,25 @@ public final class MessageProto {
     }
 
     public static final int PREID_FIELD_NUMBER = 4;
-    private volatile java.lang.Object preId_;
+    private long preId_;
     /**
-     * <code>string preId = 4;</code>
+     * <code>int64 preId = 4;</code>
      * @return The preId.
      */
     @java.lang.Override
-    public java.lang.String getPreId() {
-      java.lang.Object ref = preId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        preId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string preId = 4;</code>
-     * @return The bytes for preId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPreIdBytes() {
-      java.lang.Object ref = preId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        preId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getPreId() {
+      return preId_;
     }
 
     public static final int CID_FIELD_NUMBER = 5;
-    private volatile java.lang.Object cId_;
+    private long cId_;
     /**
-     * <code>string cId = 5;</code>
+     * <code>int64 cId = 5;</code>
      * @return The cId.
      */
     @java.lang.Override
-    public java.lang.String getCId() {
-      java.lang.Object ref = cId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        cId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string cId = 5;</code>
-     * @return The bytes for cId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getCIdBytes() {
-      java.lang.Object ref = cId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        cId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getCId() {
+      return cId_;
     }
 
     public static final int CONTENT_FIELD_NUMBER = 6;
@@ -423,11 +353,11 @@ public final class MessageProto {
       if (!getToBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, to_);
       }
-      if (!getPreIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, preId_);
+      if (preId_ != 0L) {
+        output.writeInt64(4, preId_);
       }
-      if (!getCIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cId_);
+      if (cId_ != 0L) {
+        output.writeInt64(5, cId_);
       }
       if (!getContentBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, content_);
@@ -451,11 +381,13 @@ public final class MessageProto {
       if (!getToBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, to_);
       }
-      if (!getPreIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, preId_);
+      if (preId_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, preId_);
       }
-      if (!getCIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, cId_);
+      if (cId_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, cId_);
       }
       if (!getContentBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, content_);
@@ -481,10 +413,10 @@ public final class MessageProto {
           .equals(other.getFrom())) return false;
       if (!getTo()
           .equals(other.getTo())) return false;
-      if (!getPreId()
-          .equals(other.getPreId())) return false;
-      if (!getCId()
-          .equals(other.getCId())) return false;
+      if (getPreId()
+          != other.getPreId()) return false;
+      if (getCId()
+          != other.getCId()) return false;
       if (!getContent()
           .equals(other.getContent())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -505,9 +437,11 @@ public final class MessageProto {
       hash = (37 * hash) + TO_FIELD_NUMBER;
       hash = (53 * hash) + getTo().hashCode();
       hash = (37 * hash) + PREID_FIELD_NUMBER;
-      hash = (53 * hash) + getPreId().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPreId());
       hash = (37 * hash) + CID_FIELD_NUMBER;
-      hash = (53 * hash) + getCId().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getCId());
       hash = (37 * hash) + CONTENT_FIELD_NUMBER;
       hash = (53 * hash) + getContent().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
@@ -649,9 +583,9 @@ public final class MessageProto {
 
         to_ = "";
 
-        preId_ = "";
+        preId_ = 0L;
 
-        cId_ = "";
+        cId_ = 0L;
 
         content_ = "";
 
@@ -746,13 +680,11 @@ public final class MessageProto {
           to_ = other.to_;
           onChanged();
         }
-        if (!other.getPreId().isEmpty()) {
-          preId_ = other.preId_;
-          onChanged();
+        if (other.getPreId() != 0L) {
+          setPreId(other.getPreId());
         }
-        if (!other.getCId().isEmpty()) {
-          cId_ = other.cId_;
-          onChanged();
+        if (other.getCId() != 0L) {
+          setCId(other.getCId());
         }
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
@@ -970,154 +902,64 @@ public final class MessageProto {
         return this;
       }
 
-      private java.lang.Object preId_ = "";
+      private long preId_ ;
       /**
-       * <code>string preId = 4;</code>
+       * <code>int64 preId = 4;</code>
        * @return The preId.
        */
-      public java.lang.String getPreId() {
-        java.lang.Object ref = preId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          preId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getPreId() {
+        return preId_;
       }
       /**
-       * <code>string preId = 4;</code>
-       * @return The bytes for preId.
-       */
-      public com.google.protobuf.ByteString
-          getPreIdBytes() {
-        java.lang.Object ref = preId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          preId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string preId = 4;</code>
+       * <code>int64 preId = 4;</code>
        * @param value The preId to set.
        * @return This builder for chaining.
        */
-      public Builder setPreId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setPreId(long value) {
+        
         preId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string preId = 4;</code>
+       * <code>int64 preId = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearPreId() {
         
-        preId_ = getDefaultInstance().getPreId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string preId = 4;</code>
-       * @param value The bytes for preId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPreIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        preId_ = value;
+        preId_ = 0L;
         onChanged();
         return this;
       }
 
-      private java.lang.Object cId_ = "";
+      private long cId_ ;
       /**
-       * <code>string cId = 5;</code>
+       * <code>int64 cId = 5;</code>
        * @return The cId.
        */
-      public java.lang.String getCId() {
-        java.lang.Object ref = cId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          cId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getCId() {
+        return cId_;
       }
       /**
-       * <code>string cId = 5;</code>
-       * @return The bytes for cId.
-       */
-      public com.google.protobuf.ByteString
-          getCIdBytes() {
-        java.lang.Object ref = cId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          cId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string cId = 5;</code>
+       * <code>int64 cId = 5;</code>
        * @param value The cId to set.
        * @return This builder for chaining.
        */
-      public Builder setCId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setCId(long value) {
+        
         cId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string cId = 5;</code>
+       * <code>int64 cId = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearCId() {
         
-        cId_ = getDefaultInstance().getCId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string cId = 5;</code>
-       * @param value The bytes for cId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        cId_ = value;
+        cId_ = 0L;
         onChanged();
         return this;
       }
@@ -1285,16 +1127,10 @@ public final class MessageProto {
         getToBytes();
 
     /**
-     * <code>string ackId = 4;</code>
+     * <code>int64 ackId = 4;</code>
      * @return The ackId.
      */
-    java.lang.String getAckId();
-    /**
-     * <code>string ackId = 4;</code>
-     * @return The bytes for ackId.
-     */
-    com.google.protobuf.ByteString
-        getAckIdBytes();
+    long getAckId();
   }
   /**
    * Protobuf type {@code c2c_send_response_proto}
@@ -1311,7 +1147,6 @@ public final class MessageProto {
     private c2c_send_response_proto() {
       from_ = "";
       to_ = "";
-      ackId_ = "";
     }
 
     @java.lang.Override
@@ -1361,10 +1196,9 @@ public final class MessageProto {
               to_ = s;
               break;
             }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 32: {
 
-              ackId_ = s;
+              ackId_ = input.readInt64();
               break;
             }
             default: {
@@ -1487,41 +1321,14 @@ public final class MessageProto {
     }
 
     public static final int ACKID_FIELD_NUMBER = 4;
-    private volatile java.lang.Object ackId_;
+    private long ackId_;
     /**
-     * <code>string ackId = 4;</code>
+     * <code>int64 ackId = 4;</code>
      * @return The ackId.
      */
     @java.lang.Override
-    public java.lang.String getAckId() {
-      java.lang.Object ref = ackId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        ackId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string ackId = 4;</code>
-     * @return The bytes for ackId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getAckIdBytes() {
-      java.lang.Object ref = ackId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        ackId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getAckId() {
+      return ackId_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1547,8 +1354,8 @@ public final class MessageProto {
       if (!getToBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, to_);
       }
-      if (!getAckIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, ackId_);
+      if (ackId_ != 0L) {
+        output.writeInt64(4, ackId_);
       }
       unknownFields.writeTo(output);
     }
@@ -1569,8 +1376,9 @@ public final class MessageProto {
       if (!getToBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, to_);
       }
-      if (!getAckIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, ackId_);
+      if (ackId_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, ackId_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1593,8 +1401,8 @@ public final class MessageProto {
           .equals(other.getFrom())) return false;
       if (!getTo()
           .equals(other.getTo())) return false;
-      if (!getAckId()
-          .equals(other.getAckId())) return false;
+      if (getAckId()
+          != other.getAckId()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1613,7 +1421,8 @@ public final class MessageProto {
       hash = (37 * hash) + TO_FIELD_NUMBER;
       hash = (53 * hash) + getTo().hashCode();
       hash = (37 * hash) + ACKID_FIELD_NUMBER;
-      hash = (53 * hash) + getAckId().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getAckId());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1753,7 +1562,7 @@ public final class MessageProto {
 
         to_ = "";
 
-        ackId_ = "";
+        ackId_ = 0L;
 
         return this;
       }
@@ -1844,9 +1653,8 @@ public final class MessageProto {
           to_ = other.to_;
           onChanged();
         }
-        if (!other.getAckId().isEmpty()) {
-          ackId_ = other.ackId_;
-          onChanged();
+        if (other.getAckId() != 0L) {
+          setAckId(other.getAckId());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2060,78 +1868,33 @@ public final class MessageProto {
         return this;
       }
 
-      private java.lang.Object ackId_ = "";
+      private long ackId_ ;
       /**
-       * <code>string ackId = 4;</code>
+       * <code>int64 ackId = 4;</code>
        * @return The ackId.
        */
-      public java.lang.String getAckId() {
-        java.lang.Object ref = ackId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          ackId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getAckId() {
+        return ackId_;
       }
       /**
-       * <code>string ackId = 4;</code>
-       * @return The bytes for ackId.
-       */
-      public com.google.protobuf.ByteString
-          getAckIdBytes() {
-        java.lang.Object ref = ackId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          ackId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string ackId = 4;</code>
+       * <code>int64 ackId = 4;</code>
        * @param value The ackId to set.
        * @return This builder for chaining.
        */
-      public Builder setAckId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setAckId(long value) {
+        
         ackId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string ackId = 4;</code>
+       * <code>int64 ackId = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearAckId() {
         
-        ackId_ = getDefaultInstance().getAckId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string ackId = 4;</code>
-       * @param value The bytes for ackId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAckIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        ackId_ = value;
+        ackId_ = 0L;
         onChanged();
         return this;
       }
@@ -3495,10 +3258,10 @@ public final class MessageProto {
     java.lang.String[] descriptorData = {
       "\n\022MessageProto.proto\"t\n\026c2c_send_request" +
       "_proto\022\023\n\013messageType\030\001 \001(\005\022\014\n\004from\030\002 \001(" +
-      "\t\022\n\n\002to\030\003 \001(\t\022\r\n\005preId\030\004 \001(\t\022\013\n\003cId\030\005 \001(" +
-      "\t\022\017\n\007content\030\006 \001(\t\"W\n\027c2c_send_response_" +
+      "\t\022\n\n\002to\030\003 \001(\t\022\r\n\005preId\030\004 \001(\003\022\013\n\003cId\030\005 \001(" +
+      "\003\022\017\n\007content\030\006 \001(\t\"W\n\027c2c_send_response_" +
       "proto\022\023\n\013messageType\030\001 \001(\005\022\014\n\004from\030\002 \001(\t" +
-      "\022\n\n\002to\030\003 \001(\t\022\r\n\005ackId\030\004 \001(\t\"1\n\013login_pro" +
+      "\022\n\n\002to\030\003 \001(\t\022\r\n\005ackId\030\004 \001(\003\"1\n\013login_pro" +
       "to\022\023\n\013messageType\030\001 \001(\005\022\r\n\005useId\030\002 \001(\t\"2" +
       "\n\014logout_proto\022\023\n\013messageType\030\001 \001(\005\022\r\n\005u" +
       "seId\030\002 \001(\tb\006proto3"

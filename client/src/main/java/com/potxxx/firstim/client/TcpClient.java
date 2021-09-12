@@ -62,7 +62,7 @@ public class TcpClient {
         connectToTCPGate();
         //3、登录TCPGate
         loginTcpGate();
-        sendMsg(new C2CSendRequest("1","2","xs","cas","hello"));
+        sendMsg(new C2CSendRequest("1","2",1L,2L,"hello"));
     }
 
     public void loginTcpGate(){

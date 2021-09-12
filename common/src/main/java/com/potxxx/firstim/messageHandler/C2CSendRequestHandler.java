@@ -25,7 +25,7 @@ public class C2CSendRequestHandler extends SimpleChannelInboundHandler<C2CSendRe
             C2CSendResponse c2CSendResponse = chatService.c2cSendMsg(c2CSendRequest);
             channelHandlerContext.writeAndFlush(c2CSendResponse);
         }catch (Exception e){
-            channelHandlerContext.writeAndFlush(new C2CSendResponse("11","12","error"));
+            channelHandlerContext.writeAndFlush(new C2CSendResponse("11","12",-1L));
             log.error("{}",e.toString());
         }
     }

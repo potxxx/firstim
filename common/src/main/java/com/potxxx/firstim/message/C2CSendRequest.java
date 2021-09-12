@@ -14,11 +14,11 @@ public class C2CSendRequest extends Message{
 
     String from;
     String to;
-    String preId;
-    String cId;
+    Long preId;
+    Long cId;
     String content;
 
-    public C2CSendRequest(String from,String to,String preId,String cId,String content){
+    public C2CSendRequest(String from,String to,Long preId,Long cId,String content){
         messageType = C2CSENDREQUEST;
         this.from = from;
         this.to = to;

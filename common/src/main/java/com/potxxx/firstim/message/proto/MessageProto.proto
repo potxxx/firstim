@@ -4,8 +4,8 @@ message c2c_send_request_proto {
   int32 messageType = 1;
   string from = 2;
   string to = 3;
-  string preId = 4;
-  string cId = 5;
+  int64 preId = 4;
+  int64 cId = 5;
   string content = 6;
 }
 
@@ -13,7 +13,7 @@ message c2c_send_response_proto {
   int32 messageType = 1;
   string from = 2;
   string to = 3;
-  string ackId = 4;
+  int64 ackId = 4;
 }
 
 message login_proto {

@@ -10,6 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 public class C2CSendResponseHandler extends SimpleChannelInboundHandler<C2CSendResponse> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, C2CSendResponse c2CSendResponse) throws Exception {
-        log.info("from server:{}",c2CSendResponse.getAckId());
+        log.info("from server ackID:{}",c2CSendResponse.getAckId());
     }
 }

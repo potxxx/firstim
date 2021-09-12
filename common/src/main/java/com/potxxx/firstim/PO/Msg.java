@@ -27,7 +27,7 @@ public class Msg implements Serializable {
     @TableField(value = "group_id")
     private String groupId;
     @TableField(value = "msg_cid")
-    private String msgCId;
+    private Long msgCId;
     @TableField(value = "msg_content")
     private String msgContent;
     @TableField(value = "delivered")

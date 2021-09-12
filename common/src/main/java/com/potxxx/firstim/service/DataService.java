@@ -4,6 +4,6 @@ import com.potxxx.firstim.message.C2CSendRequest;
 
 public interface DataService {
 
-    String findLatestCIdByFromAndTo(String from,String to);
-    boolean insertC2CMsg(C2CSendRequest c2CSendRequest);
+    Long findLatestCIdByFromAndTo(String from,String to);
+    int insertC2CMsg(C2CSendRequest c2CSendRequest);
 }
