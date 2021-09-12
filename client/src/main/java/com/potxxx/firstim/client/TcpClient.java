@@ -21,6 +21,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -51,6 +55,11 @@ public class TcpClient {
     @Autowired
     IpConfigClient ipConfigClient;
 
+    //ack队列
+    ConcurrentHashMap<String, TreeMap<Long,Message>> ackMap = new ConcurrentHashMap<>();
+
+    private static Executor loop = Executors.newSingleThreadExecutor();
+
     @PostConstruct
     public void start() {
 
@@ -62,17 +71,54 @@ public class TcpClient {
         connectToTCPGate();
         //3、登录TCPGate
         loginTcpGate();
-        sendMsg(new C2CSendRequest("1","2",1L,2L,"hello"));
+        //4、开启Loop
+        loop.execute(this::scanAckListAndSend);
+        //test
+        send(new C2CSendRequest("1","2",14L,15L,"testpreid"));
+    }
+
+    private void scanAckListAndSend(){
+
+        while(true){
+            synchronized (ackMap){
+                for(Map.Entry<String, TreeMap<Long,Message>> e : ackMap.entrySet()){
+                    if(e.getValue().isEmpty()){
+                        continue;
+                    }
+                    sendMsg(e.getValue().firstEntry().getValue());
+                }
+            }
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void loginTcpGate(){
         sendMsg(new Login(clientUseId));
     }
-
-    public void sendMsg(Message message){
+    //对外接口
+    public void send(Message message){
+        insertAckList(message);
+    }
+    //消息实际发送
+    private void sendMsg(Message message){
         tryReconnect();
         channel.writeAndFlush(message);
     }
+    void insertAckList(Message message){
+        if(message instanceof C2CSendRequest){
+            C2CSendRequest c = (C2CSendRequest) message;
+            ackMap.putIfAbsent(c.getTo(),new TreeMap<Long, Message>());
+            if(ackMap.get(c.getTo()).containsKey(c.getCId())){
+                return;
+            }
+            ackMap.get(c.getTo()).put(c.getCId(),message);
+        }
+    }
+
 
     void connectToTCPGate(){
         bootstrap = new Bootstrap();
@@ -92,7 +138,7 @@ public class TcpClient {
                                 .addLast(new MessageLengthFieldFrameDecoder())
                                 .addLast(new MessageCoder())
                                 .addLast(new HeartBeatHandler())
-                                .addLast(new C2CSendResponseHandler());
+                                .addLast(new C2CSendResponseHandler(ackMap));
                     }
                 });
         retryCnt = 0;
@@ -124,6 +170,7 @@ public class TcpClient {
         if(channel != null){
             channel.close();
         }
+
     }
 
 

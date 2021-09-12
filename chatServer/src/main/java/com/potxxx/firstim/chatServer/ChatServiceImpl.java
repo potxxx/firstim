@@ -21,11 +21,8 @@ public class ChatServiceImpl implements ChatService {
     public C2CSendResponse c2cSendMsg(C2CSendRequest c2CSendRequest) {
         //1、查询当前会话的cid最大值
         Long latestCId = dataService.findLatestCIdByFromAndTo(c2CSendRequest.getFrom(), c2CSendRequest.getTo());
-        if(latestCId == null){
-            return new C2CSendResponse(c2CSendRequest.getFrom(),c2CSendRequest.getTo(), -1L);
-        }
-        //2、与入参的preid相等则入库返回ack
-        if(latestCId.equals(c2CSendRequest.getPreId())){
+        //2、与入参的preid相等或为第一条数据则入库返回ack
+        if(latestCId == null || latestCId.equals(c2CSendRequest.getPreId())){
             if(dataService.insertC2CMsg(c2CSendRequest) != -1){
                 return new C2CSendResponse(c2CSendRequest.getFrom(),c2CSendRequest.getTo(), c2CSendRequest.getCId());
             }
