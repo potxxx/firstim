@@ -36,7 +36,8 @@ public class TcpGateServer {
     private int nettyPort;
     @Value("${tcpgateserver.readerIdleTimeSeconds}")
     private int readerIdleTimeSeconds;
-
+    @Value("${server.port}")
+    private int serverport;
     @Autowired
     RedisTemplate redisTemplate;
 
@@ -51,7 +52,7 @@ public class TcpGateServer {
     @PostConstruct
     void start(){
         try {
-            serverAddr = InetAddress.getLocalHost().getHostAddress()+":"+String.valueOf(nettyPort);
+            serverAddr = InetAddress.getLocalHost().getHostAddress()+":"+String.valueOf(serverport);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -72,7 +73,7 @@ public class TcpGateServer {
                                 .addLast(new MessageLengthFieldFrameDecoder())
                                 .addLast(new MessageCoder())
                                 .addLast(new PingHandler())
-                                .addLast(new LoginHandler(serverAddr,redisTemplate))
+                                .addLast(new LoginHandler(serverAddr,redisTemplate,ChannelCache.map))
                                 .addLast(new C2CSendRequestHandler(chatService));
                     }
                 });

@@ -22,6 +22,7 @@ public class DataServiceImpl implements DataService {
 
     @Override
     public Long findLatestCIdByFromAndTo(String from, String to) {
+
         return msgMapper.findLatestCIdByFromAndTo(from, to);
     }
 

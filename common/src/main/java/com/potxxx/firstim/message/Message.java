@@ -17,6 +17,9 @@ public abstract class Message implements Serializable {
     public static final int LOGOUT = 3;
     public static final int C2CSENDREQUEST = 4;
     public static final int C2CSENDRESPONSE = 5;
+    public static final int PULLNOTICE = 6;
+    public static final int PULLREQUEST = 7;
+    public static final int PULLRESPONSE = 8;
 
     public static Message parseFromBytes(int messageType, byte[] bytes) {
         switch (messageType){
@@ -32,6 +35,12 @@ public abstract class Message implements Serializable {
                 return C2CSendRequest.parseFrom(bytes);
             case C2CSENDRESPONSE:
                 return C2CSendResponse.parseFrom(bytes);
+            case PULLNOTICE:
+                return PullNotice.parseFrom(bytes);
+            case PULLREQUEST:
+                return PullRequest.parseFrom(bytes);
+            case PULLRESPONSE:
+                return PullResponse.parseFrom(bytes);
         }
         return null;
     }

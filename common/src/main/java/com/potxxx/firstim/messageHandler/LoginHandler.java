@@ -16,11 +16,12 @@ import java.util.concurrent.TimeUnit;
 public class LoginHandler extends SimpleChannelInboundHandler<Login> {
     private  RedisTemplate redisTemplate;
     private  String serverAddr;
-    static ConcurrentHashMap<String, Channel> map = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Channel> map;
 
-    public LoginHandler(String serverAddr,RedisTemplate redisTemplate){
+    public LoginHandler(String serverAddr,RedisTemplate redisTemplate,ConcurrentHashMap<String, Channel> map){
         this.serverAddr = serverAddr;
         this.redisTemplate = redisTemplate;
+        this.map = map;
     }
 
     @Override

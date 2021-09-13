@@ -58,7 +58,7 @@ public class TcpClient {
     //ack队列
     ConcurrentHashMap<String, TreeMap<Long,Message>> ackMap = new ConcurrentHashMap<>();
 
-    private static Executor loop = Executors.newSingleThreadExecutor();
+    private static Executor loop = Executors.newFixedThreadPool(2);
 
     @PostConstruct
     public void start() {
@@ -71,10 +71,12 @@ public class TcpClient {
         connectToTCPGate();
         //3、登录TCPGate
         loginTcpGate();
-        //4、开启Loop
+        //4、开启消息发送Loop
         loop.execute(this::scanAckListAndSend);
+        //5、开启消息接受Loop
+
         //test
-        send(new C2CSendRequest("1","2",14L,15L,"testpreid"));
+        send(new C2CSendRequest("mytestclient","mytestclient",14L,15L,"testpreid"));
     }
 
     private void scanAckListAndSend(){

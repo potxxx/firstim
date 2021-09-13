@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
 public interface MsgMapper extends BaseMapper<Msg> {
 
     @Select("SELECT msg_cid FROM msg WHERE msg_from = #{from} and msg_to = #{to} order by msg_cid desc limit 1")
-    long findLatestCIdByFromAndTo(@Param("from") String from,@Param("to") String to);
+    Long findLatestCIdByFromAndTo(@Param("from") String from,@Param("to") String to);
 
 
 }
