@@ -1,5 +1,5 @@
 ##FirstIM
->一个使用java编写的分布式即时通讯系统，包含基础的IM系统功能以及常见分布式组件的使用。
+> 一个使用java编写的分布式即时通讯系统，包含基础的IM系统功能以及常见分布式组件的使用，用作学习分享。
 
 ##一、业务梳理
 1. 一对一聊天、群聊，消息有序、不丢失、不重复，且支持离线消息与已读未读信息查看
@@ -16,12 +16,12 @@
 
 ##三、业务逻辑设计
 1. 一对一聊天业务逻辑
->1.clientA向gate发送send消息---client本地为每个会话生成一个ack队列，为每个消息分配一个本地顺序递增的cid，并将其加入会话的ack队列，send后启动定时器超时重发对应的消息  
+>1.clientA向gate发送send消息---client本地为每个会话生成一个ack队列，为每个消息分配一个本地顺序递增的cid，并将其加入会话的ack队列，周期性的发送未ack的消息  
 >2.gate将消息转发给logic  
 >3.logic收到消息后，找到当前会话中用户已发送的最大cid，若此cid与send接受到的preid相同则接收这个send的cid，落库并为这条消息生成一个本次会话中的串行有序msg_id之后返回ack给clientA  
 >4.logic转发下行消息至route，route查找缓存找到clientB连接状态，若在线则转发到clientB长连接所在的gate，若离线则流程终止  
 >5.gate接受到下行消息则通知clientB来拉取新消息  
->6.clientB接收到拉取消息后，发送clientB本地的已接受到的msg_id去拉取新的消息---本次的拉取msg_id可作为上次接收信心的ack，所以设置兜底策略，clientB每五秒进行一次新消息的拉取用作拉取消息同时更新状态  
+>6.clientB接收到拉取消息后，发送clientB本地的已接受到的msg_id去拉取新的消息---本次的拉取msg_id可作为上次接收信心的ack，所以设置兜底策略，clientB每一秒进行一次新消息的拉取用作拉取消息同时更新状态  
 >7.logic收到拉取消息之后，将上一条状态设置为已送达，并给clientA返回已读  
 >8.若clientB从离线转换为在线之后，主动拉取新的消息
 2. 一对多聊天业务逻辑
@@ -47,14 +47,15 @@ id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者us
 4. 负载均衡设计：TCPGateWayServer的分配采用hash一致性算法，当某一个gate宕机，客户端心跳机制会重新进行连接，当新加入一个gate服务后，控制的gate服务主动断开需要rehash的长连接并给这些连接下发重新连接的命令，同时这些客户端也会通过心跳机制进行重连
 5. 消息表水平分库与索引：按照msg_to进行hash，查询频繁的功能有：查询msg_from、msg_to的最大msg_cid---建立这三个列的复合索引、查询msg_to且大于msg_id的所有消息---建立这两个列的复合索引
 6. 由于分库导致msg_id不能全局递增，需要设计一个分布式递增id服务  
-7. redis路由---uid，gateServerIp
+7. redis路由---uid，gateServerIp  
+
 ##六、功能开发
 * [x] 私有通讯协议实现---心跳、重连、序列化、拆包解包
 * [x] 业务流程服务打通---接入层、网关层、业务层消息转发
 * [x] 存储层接口实现
 * [x] 上行消息逻辑---递增cid生成、ack队列重试、推送接口(preid沟通)
-* [ ] 下行消息逻辑---拉取接口设计
-* [ ] 一致性hash负载均衡长连接上线下线实现
+* [x] 下行消息逻辑---拉取接口设计
+
 
 ##七、技术细节
 1. 自定义协议设计
@@ -66,6 +67,16 @@ id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者us
 > 推送控制消息 消息体为空  
 > 拉取消息 PullRequest[uid,msgId--本地收到的最大消息id--该id之前的消息已全接收] PullResponse[msgList消息数组--from、to、msgType、msgId、content]
 
-##八、待解决问题
-1. 多个相同消息同时插入数据库，这时会先查看最大的cid，然后再插入，select与update非原子----使用select for update与事务解决
-2. 同时收到多个拉取指令，只将客户端拉取标识改为可拉取，客户端维持一个loop每100ms判断是否需要发送pullrequest
+2. 客户端异步消息设计
+> 上行消息 发送队列中每100ms扫描发送所有未ack的消息，服务器返回已ack的消息，将ack消息移出待发送消息队列。  
+> 下行消息 每1000ms拉取一次新消息防止消息丢失，若期间接收到了服务器发送来的拉取控制消息则在100ms的间隔时间内只批量拉取一次新消息。  
+
+3. 技术栈
+> protobuf 自定义协议序列化与反序列化工具  
+> netty 长连接协议交互  
+> dubbo 集群内部rpc负载均衡调用  
+> zookeeper 支撑dubbo用作服务注册与发现  
+> redis 单点存储用户与长连接服务器的关系，支撑tcpGateServer水平部署  
+> feign 支撑logserver指定具体ip转发下行消息至tcpGateServer  
+> mysql 底层消息持久化  
+> mybatis-plus 简化sql操作
