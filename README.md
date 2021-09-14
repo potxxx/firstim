@@ -9,10 +9,10 @@
 #二、架构设计
 1. 网关层IPConfServer，对长连接请求进行负载均衡，通过服务发现获取TCPGateWayServer的IP，指定策略返回直连IP
 2. 接入层TCPGateWayServer，保持用户长连接的建立与维持，无状态多机部署，连接的建立与断开均告知RouteServer路由，业务消息均下发LogicServer进行处理
-3. 路由层RouteServer，保存TCPGateWayServer与长连接uid的映射关系将其存储至缓存，并支持下行消息的转发
+3. 使用redis，保存TCPGateWayServer与长连接uid的映射关系将其存储至缓存，并支持下行消息的转发
 4. 业务逻辑层LogicServer--聊天、红包等服务，接受上行消息实现各项业务功能，下行消息的下发
 5. 存储层DAS，对业务层提供存储接口，屏蔽底层存储逻辑
-6. 服务发现组件使用Nacos，缓存组件使用redis，持久化存储使用mysql
+6. 服务发现组件使用zookeeper，缓存组件使用redis，持久化存储使用mysql
 
 ![Image text](https://gitee.com/potxxx/firstim/raw/master/image/架构图.jpg)
 
@@ -21,7 +21,7 @@
 >1.clientA向gate发送send消息---client本地为每个会话生成一个ack队列，为每个消息分配一个本地顺序递增的cid，并将其加入会话的ack队列，周期性的发送未ack的消息  
 >2.gate将消息转发给logic  
 >3.logic收到消息后，找到当前会话中用户已发送的最大cid，若此cid与send接受到的preid相同则接收这个send的cid，落库并为这条消息生成一个本次会话中的串行有序msg_id之后返回ack给clientA  
->4.logic转发下行消息至route，route查找缓存找到clientB连接状态，若在线则转发到clientB长连接所在的gate，若离线则流程终止  
+>4.logic转发下行消息，查找缓存找到clientB连接状态，若在线则转发到clientB长连接所在的gate，若离线则流程终止  
 >5.gate接受到下行消息则通知clientB来拉取新消息  
 >6.clientB接收到拉取消息后，发送clientB本地的已接受到的msg_id去拉取新的消息---本次的拉取msg_id可作为上次接收信心的ack，所以设置兜底策略，clientB每一秒进行一次新消息的拉取用作拉取消息同时更新状态  
 >7.logic收到拉取消息之后，将上一条状态设置为已送达，并给clientA返回已读  
