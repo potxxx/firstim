@@ -65,3 +65,7 @@ id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者us
 > 群聊 C2GSendRequest[from,group,preId---当前发送的cid的上一个id、cid、content] C2CSendResponse[preid---当前已落库的cid]  
 > 推送控制消息 消息体为空  
 > 拉取消息 PullRequest[uid,msgId--本地收到的最大消息id--该id之前的消息已全接收] PullResponse[msgList消息数组--from、to、msgType、msgId、content]
+
+##八、待解决问题
+1. 多个相同消息同时插入数据库，这时会先查看最大的cid，然后再插入，select与update非原子----使用select for update与事务解决
+2. 同时收到多个拉取指令，只将客户端拉取标识改为可拉取，客户端维持一个loop每100ms判断是否需要发送pullrequest

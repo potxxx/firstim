@@ -6,6 +6,7 @@ import com.potxxx.firstim.message.MessageLengthFieldFrameDecoder;
 import com.potxxx.firstim.messageHandler.C2CSendRequestHandler;
 import com.potxxx.firstim.messageHandler.LoginHandler;
 import com.potxxx.firstim.messageHandler.PingHandler;
+import com.potxxx.firstim.messageHandler.PullRequestHandler;
 import com.potxxx.firstim.service.ChatService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -74,7 +75,9 @@ public class TcpGateServer {
                                 .addLast(new MessageCoder())
                                 .addLast(new PingHandler())
                                 .addLast(new LoginHandler(serverAddr,redisTemplate,ChannelCache.map))
-                                .addLast(new C2CSendRequestHandler(chatService));
+                                .addLast(new C2CSendRequestHandler(chatService))
+                                .addLast(new PullRequestHandler(chatService))
+                        ;
                     }
                 });
             serverBootstrap.bind(nettyPort).addListener((f)->{

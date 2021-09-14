@@ -2,9 +2,8 @@ package com.potxxx.firstim.chatServer;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
-import com.potxxx.firstim.message.C2CSendRequest;
-import com.potxxx.firstim.message.C2CSendResponse;
-import com.potxxx.firstim.message.PullNotice;
+import com.potxxx.firstim.PO.Msg;
+import com.potxxx.firstim.message.*;
 import com.potxxx.firstim.service.ChatService;
 import com.potxxx.firstim.service.DataService;
 import com.potxxx.firstim.service.TcpGateAddrService;
@@ -22,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -36,6 +36,14 @@ public class ChatServiceImpl implements ChatService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Override
+    public PullResponse pullMsg(PullRequest pullRequest) {
+
+        List<Msg> msgs = dataService.getNewMsgByUserIdAndMaxMsgId(pullRequest.getUseId(),pullRequest.getMaxMsgId());
+        PullResponse res = new PullResponse(pullRequest.getUseId(),msgs);
+        return res;
+    }
 
     @Override
     public C2CSendResponse c2cSendMsg(C2CSendRequest c2CSendRequest)  {
@@ -53,8 +61,6 @@ public class ChatServiceImpl implements ChatService {
                 } catch (URISyntaxException e) {
                     log.warn("{}",e.toString());
                 }
-
-
                 return new C2CSendResponse(c2CSendRequest.getFrom(),c2CSendRequest.getTo(), c2CSendRequest.getCId());
             }
         }
@@ -66,9 +72,5 @@ public class ChatServiceImpl implements ChatService {
     private String getUserWhere(String userId ){
         Object addr = redisTemplate.opsForValue().get(userId);
         return addr == null? null:(String) addr;
-
     }
-
-
-
 }

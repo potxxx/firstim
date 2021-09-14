@@ -4,6 +4,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.potxxx.firstim.PO.Msg;
 import com.potxxx.firstim.message.proto.MessageProto;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -26,16 +27,38 @@ import java.util.List;
 //        }
 
 @Data
+@NoArgsConstructor
 @Slf4j
 public class PullResponse extends Message{
 
     String useId;
-    List<MessageProto.msg_proto> msgs;
+    List<Msg> msgs;
 
     public PullResponse(String useId,List<Msg> msgs){
         messageType = PULLRESPONSE;
         this.useId = useId;
-        this.msgs = msg2msgProto(msgs);
+        this.msgs = msgs;
+    }
+
+    private PullResponse(MessageProto.pull_response_proto proto){
+        messageType = proto.getMessageType();
+        useId = proto.getUseId();
+        msgs = msgProto2msg(proto.getMsgsList());
+    }
+
+    private List<Msg> msgProto2msg(List<MessageProto.msg_proto> protos){
+        List<Msg> res = new ArrayList<>();
+        for(MessageProto.msg_proto proto:protos){
+            Msg m = new Msg();
+            m.setMsgTo(proto.getToId());
+            m.setMsgFrom(proto.getFromId());
+            m.setMsgContent(proto.getContent());
+            m.setGroupId(proto.getGroupId());
+            m.setId((int) proto.getMsgId());
+            m.setMsgType(proto.getMsgType());
+            res.add(m);
+        }
+        return res;
     }
 
     private List<MessageProto.msg_proto> msg2msgProto(List<Msg> msgs){
@@ -52,12 +75,6 @@ public class PullResponse extends Message{
             res.add(p);
         }
         return res;
-    }
-
-    private PullResponse(MessageProto.pull_response_proto proto){
-        messageType = proto.getMessageType();
-        useId = proto.getUseId();
-        msgs = proto.getMsgsList();
     }
 
     public static PullResponse parseFrom(byte[] bytes) {
@@ -81,7 +98,7 @@ public class PullResponse extends Message{
         return MessageProto.pull_response_proto.newBuilder()
                 .setMessageType(PULLRESPONSE)
                 .setUseId(useId)
-                .addAllMsgs(msgs)
+                .addAllMsgs(msg2msgProto(msgs))
                 .build()
                 .toByteArray();
     }

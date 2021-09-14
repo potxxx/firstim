@@ -3,9 +3,11 @@ package com.potxxx.firstim.message;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.potxxx.firstim.message.proto.MessageProto;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
+@NoArgsConstructor
 @Slf4j
 public class PullRequest extends Message {
 

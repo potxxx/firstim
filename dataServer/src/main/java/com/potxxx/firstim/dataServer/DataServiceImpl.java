@@ -11,6 +11,7 @@ import com.potxxx.firstim.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -39,5 +40,10 @@ public class DataServiceImpl implements DataService {
         msg.setMsgContent(c2CSendRequest.getContent());
 
         return msgMapper.insert(msg);
+    }
+
+    @Override
+    public List<Msg> getNewMsgByUserIdAndMaxMsgId(String useId, Long maxMsgId) {
+        return msgMapper.getNewMsgByUserIdAndMaxMsgId(useId,maxMsgId);
     }
 }

@@ -13,7 +13,6 @@ public class TcpGateController {
 
     @PostMapping("/transPullNotice")
     public boolean transPullMsg(@RequestBody PullNotice pullNotice){
-        log.info("get transPullMsg:{}",pullNotice.getUseId());
         Channel channel = ChannelCache.map.get(pullNotice.getUseId());
         if(channel == null) return false;
         channel.writeAndFlush(pullNotice);

@@ -3,6 +3,8 @@ package com.potxxx.firstim.client;
 import com.potxxx.firstim.message.*;
 import com.potxxx.firstim.messageHandler.C2CSendResponseHandler;
 import com.potxxx.firstim.messageHandler.HeartBeatHandler;
+import com.potxxx.firstim.messageHandler.PullNoticeHandler;
+import com.potxxx.firstim.messageHandler.PullResponseHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -14,17 +16,17 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.internal.logging.InternalLogLevel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Component
@@ -52,6 +54,12 @@ public class TcpClient {
 
     private int tcpGatePort;
 
+    private AtomicLong maxAckMsgId = new AtomicLong(0);
+
+    private Long timeCnt = 0L;
+
+    AtomicBoolean canPullMsg = new AtomicBoolean(false);
+
     @Autowired
     IpConfigClient ipConfigClient;
 
@@ -74,9 +82,33 @@ public class TcpClient {
         //4、开启消息发送Loop
         loop.execute(this::scanAckListAndSend);
         //5、开启消息接受Loop
-
+        loop.execute(this::pullNewMsg);
         //test
-        send(new C2CSendRequest("mytestclient","mytestclient",14L,15L,"testpreid"));
+        send(new C2CSendRequest("mytestclient","mytestclient",15L,16L,"pulltest"));
+    }
+
+    private void pullNewMsg(){
+        while(true){
+            if(canPullMsg.get()){
+                log.info("send pull request");
+                channel.writeAndFlush(new PullRequest(clientUseId,maxAckMsgId.get())).addListener((f)->{
+                    if(f.isSuccess()){
+                        canPullMsg.set(false);
+                    }
+                });
+            }else{
+                //防止消息丢失，每秒主动拉取一次新消息
+                if(timeCnt %10 == 0){
+                    channel.writeAndFlush(new PullRequest(clientUseId,maxAckMsgId.get()));
+                }
+            }
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            timeCnt++;
+        }
     }
 
     private void scanAckListAndSend(){
@@ -140,7 +172,10 @@ public class TcpClient {
                                 .addLast(new MessageLengthFieldFrameDecoder())
                                 .addLast(new MessageCoder())
                                 .addLast(new HeartBeatHandler())
-                                .addLast(new C2CSendResponseHandler(ackMap));
+                                .addLast(new C2CSendResponseHandler(ackMap))
+                                .addLast(new PullNoticeHandler(canPullMsg))
+                                .addLast(new PullResponseHandler(maxAckMsgId))
+                        ;
                     }
                 });
         retryCnt = 0;
