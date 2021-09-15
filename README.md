@@ -8,7 +8,7 @@
 
 #二、架构设计
 1. 网关层IPConfServer，对长连接请求进行负载均衡，通过服务发现获取TCPGateWayServer的IP，指定策略返回直连IP
-2. 接入层TCPGateWayServer，保持用户长连接的建立与维持，无状态多机部署，连接的建立与断开均告知RouteServer路由，业务消息均下发LogicServer进行处理
+2. 接入层TCPGateWayServer，保持用户长连接的建立与维持，水平部署，连接的建立与断开于redis保存路由，业务消息均下发LogicServer进行处理
 3. 使用redis，保存TCPGateWayServer与长连接uid的映射关系将其存储至缓存，并支持下行消息的转发
 4. 业务逻辑层LogicServer--聊天、红包等服务，接受上行消息实现各项业务功能，下行消息的下发
 5. 存储层DAS，对业务层提供存储接口，屏蔽底层存储逻辑
@@ -26,6 +26,10 @@
 >6.clientB接收到拉取消息后，发送clientB本地的已接受到的msg_id去拉取新的消息---本次的拉取msg_id可作为上次接收信心的ack，所以设置兜底策略，clientB每一秒进行一次新消息的拉取用作拉取消息同时更新状态  
 >7.logic收到拉取消息之后，将上一条状态设置为已送达，并给clientA返回已读  
 >8.若clientB从离线转换为在线之后，主动拉取新的消息
+
+![Image text](https://gitee.com/potxxx/firstim/raw/master/image/消息流转.jpg)
+
+
 2. 一对多聊天业务逻辑
 >1.上行消息同一对一聊天逻辑  
 >2.下行消息采用扩散写模式，一个用户的消息扩散为对多个用户的一对一消息入库，clientB拉取消息时直接拉取大于本地的msg_id消息，之后在本地进行不同会话的分离  
@@ -44,8 +48,8 @@ id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者us
 
 #五、技术方案设计
 1. 长连接服务采用netty编写：通信协议自定义私有协议，序列化采用protobuf，协议支持客户端心跳检测与断线重连，服务端若长时间无心跳则自动断连
-2. 消息有序性保证：对于上行消息client为每一个会话采用一个递增的cid，服务端接收消息进行流量整型按照cid的顺序生成递增的msg_id，对于下行消息都采用先通知后拉取的方式，拉取后在本地按照msg_id进行排序，这样就能保证接收方看到的消息顺序与发送方看到的一致，而群聊消息不同用户消息之间的顺序按照达到业务服务器的时间设定
-3. 消息不丢失不重复保证：客户端维持一个ack队列未ack消息超时重发，消息发送带上本次消息的cid以及本次会话上次消息的preid，接收服务器检查preid是否与已接收到的最大cid相同，若相同则说明接收到顺序消息，若不同则判断是否已接收，返回一个服务端最大的cid
+2. 消息有序性保证：对于上行消息client为每一个会话采用一个递增的cid，服务端接收消息按照cid的顺序生成递增的msg_id，对于下行消息都采用先通知后拉取的方式，拉取后在本地按照msg_id进行排序，这样就能保证接收方看到的消息顺序与发送方看到的一致，而群聊消息不同用户消息之间的顺序按照达到业务服务器的时间设定
+3. 消息不丢失不重复保证：客户端维持一个ack队列未ack消息循环重发，消息发送带上本次消息的cid以及本次会话上次已ack消息的preid，接收服务器检查preid是否与已接收到的最大cid相同，若相同则说明接收到顺序消息，若不同则判断是否已接收，返回一个服务端已接收的最大cid
 4. 负载均衡设计：TCPGateWayServer的分配采用hash一致性算法，当某一个gate宕机，客户端心跳机制会重新进行连接，当新加入一个gate服务后，控制的gate服务主动断开需要rehash的长连接并给这些连接下发重新连接的命令，同时这些客户端也会通过心跳机制进行重连
 5. 消息表水平分库与索引：按照msg_to进行hash，查询频繁的功能有：查询msg_from、msg_to的最大msg_cid---建立这三个列的复合索引、查询msg_to且大于msg_id的所有消息---建立这两个列的复合索引
 6. 由于分库导致msg_id不能全局递增，需要设计一个分布式递增id服务  
@@ -54,10 +58,11 @@ id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者us
 #六、功能开发
 * [x] 私有通讯协议实现---心跳、重连、序列化、拆包解包
 * [x] 业务流程服务打通---接入层、网关层、业务层消息转发
-* [x] 存储层接口实现
+* [x] 存储层服务
 * [x] 上行消息逻辑---递增cid生成、ack队列重试、推送接口(preid沟通)
 * [x] 下行消息逻辑---拉取接口设计
-
+* [x] 一对一聊天业务实现
+* [ ] 分布式id生成服务
 
 #七、技术细节
 1. 自定义协议设计
@@ -67,7 +72,8 @@ id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者us
 > 单聊 C2CSendRequest[from、to、preId---当前发送的cid的上一个id、cid、content] C2CSendResponse[from、to、ackid---当前已落库的cid]  
 > 群聊 C2GSendRequest[from,group,preId---当前发送的cid的上一个id、cid、content] C2CSendResponse[preid---当前已落库的cid]  
 > 推送控制消息 消息体为空  
-> 拉取消息 PullRequest[uid,msgId--本地收到的最大消息id--该id之前的消息已全接收] PullResponse[msgList消息数组--from、to、msgType、msgId、content]
+> 拉取消息 PullRequest[uid,msgId--本地收到的最大消息id--该id之前的消息已全接收] PullResponse[msgList消息数组--from、to、msgType、msgId、content]  
+>3.客户端读写空闲发送心跳包，若出现异常则尝试三次重连；服务端读空闲超时（超时时间设置为客户端三倍心跳间隔），主动断开连接。
 
 2. 客户端异步消息设计
 > 上行消息 发送队列中每100ms扫描发送所有未ack的消息，服务器返回已ack的消息，将ack消息移出待发送消息队列。  
@@ -79,6 +85,6 @@ id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者us
 > dubbo 集群内部rpc负载均衡调用  
 > zookeeper 支撑dubbo用作服务注册与发现  
 > redis 单点存储用户与长连接服务器的关系，支撑tcpGateServer水平部署  
-> feign 支撑logserver指定具体ip转发下行消息至tcpGateServer  
+> feign 提供集群内http客户端封装,如支撑logserver指定具体ip转发下行消息至tcpGateServer  
 > mysql 底层消息持久化  
-> mybatis-plus 简化sql操作
+> mybatis-plus 简化crud操作

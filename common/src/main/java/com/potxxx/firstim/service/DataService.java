@@ -9,7 +9,6 @@ public interface DataService {
 
     Long findLatestCIdByFromAndTo(String from,String to);
     int insertC2CMsg(C2CSendRequest c2CSendRequest);
-
-
     List<Msg> getNewMsgByUserIdAndMaxMsgId(String useId,Long maxMsgId);
+    int updateDelivered(String useId,Long maxMsgId);
 }

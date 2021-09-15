@@ -46,4 +46,9 @@ public class DataServiceImpl implements DataService {
     public List<Msg> getNewMsgByUserIdAndMaxMsgId(String useId, Long maxMsgId) {
         return msgMapper.getNewMsgByUserIdAndMaxMsgId(useId,maxMsgId);
     }
+
+    @Override
+    public int updateDelivered(String useId, Long maxMsgId) {
+        return msgMapper.updateDelivered(useId,maxMsgId);
+    }
 }
