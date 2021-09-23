@@ -37,7 +37,7 @@ public class DataServiceImpl implements DataService {
     public int insertC2CMsg(C2CSendRequest c2CSendRequest) {
 
         Msg msg = new Msg();
-        msg.setMsgId(String.valueOf(genIDService.getID()));
+        msg.setMsgId(genIDService.getID());
         msg.setMsgCId(c2CSendRequest.getCId());
         msg.setMsgTo(c2CSendRequest.getTo());
         msg.setMsgFrom(c2CSendRequest.getFrom());

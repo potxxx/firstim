@@ -77,7 +77,7 @@ public class TcpClient {
         //开启消息接受Loop
         loop.execute(this::pullNewMsg);
         //test
-        send(new C2CSendRequest("mytestclient","mytestclient",16L,17L,"pulltest"));
+        send(new C2CSendRequest("1","1",16L,17L,"pulltest"));
     }
 
     private void pullNewMsg(){

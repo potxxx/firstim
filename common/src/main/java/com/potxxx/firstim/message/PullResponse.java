@@ -54,7 +54,7 @@ public class PullResponse extends Message{
             m.setMsgFrom(proto.getFromId());
             m.setMsgContent(proto.getContent());
             m.setGroupId(proto.getGroupId());
-            m.setMsgId(String.valueOf(proto.getMsgId()));
+            m.setMsgId(proto.getMsgId());
             m.setMsgType(proto.getMsgType());
             res.add(m);
         }
@@ -68,7 +68,7 @@ public class PullResponse extends Message{
                     .setFromId(m.getMsgFrom())
                     .setToId(m.getMsgTo())
                     .setContent(m.getMsgContent())
-                    .setMsgId(Long.parseLong(m.getMsgId()))
+                    .setMsgId(m.getMsgId())
                     .setGroupId(m.getGroupId())
                     .setMsgType(m.getMsgType())
                     .build();

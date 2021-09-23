@@ -17,7 +17,7 @@ public class Msg implements Serializable {
     @TableId(value = "id")
     private int id;
     @TableField(value = "msg_id")
-    private String msgId;
+    private Long msgId;
     @TableField(value = "msg_from")
     private String msgFrom;
     @TableField(value = "msg_to")

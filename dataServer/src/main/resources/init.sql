@@ -30,7 +30,7 @@ CREATE TABLE `group_user`  (
 DROP TABLE IF EXISTS msg;
 CREATE TABLE `msg`  (
                         `id` int(11) NOT NULL AUTO_INCREMENT,
-                        `msg_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                        `msg_id` bigint(64) NOT NULL,
                         `msg_from` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
                         `msg_to` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
                         `msg_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,

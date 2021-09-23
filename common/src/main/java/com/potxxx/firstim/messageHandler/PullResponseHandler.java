@@ -20,7 +20,7 @@ public class PullResponseHandler extends SimpleChannelInboundHandler<PullRespons
         if(pullResponse.getMsgs() == null||pullResponse.getMsgs().size() == 0) return;
         long maxid = 0;
         for(Msg m:pullResponse.getMsgs()){
-            maxid = Math.max(maxid,Long.parseLong(m.getMsgId()));
+            maxid = Math.max(maxid,m.getMsgId());
             log.info(" msg from {} -- {}",m.getMsgFrom(),m.getMsgContent());
         }
         maxAckMsgId.set(maxid);

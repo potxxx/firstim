@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 @EnableDubbo
 @SpringBootApplication
+@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 @MapperScan("com.potxxx.firstim.dataServer.Mapper")
 public class DataServerApplication {
     public static void main(String[] args) {
