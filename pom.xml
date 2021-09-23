@@ -9,6 +9,7 @@
         <module>ipconfig</module>
         <module>chatServer</module>
         <module>dataServer</module>
+        <module>genID</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

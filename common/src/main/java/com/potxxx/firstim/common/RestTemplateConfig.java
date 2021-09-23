@@ -1,4 +1,4 @@
-package com.potxxx.firstim.chatServer;
+package com.potxxx.firstim.common;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;

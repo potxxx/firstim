@@ -1,4 +1,4 @@
-package com.potxxx.firstim.tcpGate;
+package com.potxxx.firstim.genID;
 
 import com.alibaba.dubbo.config.spring.context.annotation.EnableDubbo;
 import lombok.extern.slf4j.Slf4j;
@@ -8,18 +8,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 @Slf4j
 @EnableDubbo
 @SpringBootApplication
-@ComponentScan({"com.potxxx.firstim.common","com.potxxx.firstim.tcpGate"})
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
-public class TcpGateApplication {
-    public static void main(String[] args) throws UnknownHostException {
-        SpringApplication.run(TcpGateApplication.class,args);
-        String localaddr = InetAddress.getLocalHost().getHostAddress();
-        log.info("----TcpGateWeb服务启动成功 {}----",localaddr);
+@ComponentScan(value = "com.potxxx.firstim.common")
+public class GenIDApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(GenIDApplication.class,args);
     }
 }

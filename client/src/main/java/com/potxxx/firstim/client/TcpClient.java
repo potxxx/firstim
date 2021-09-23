@@ -70,21 +70,14 @@ public class TcpClient {
 
     @PostConstruct
     public void start() {
-
-        //1、获取TCPGate服务地址
-        String[] temp = ipConfigClient.getTcpGateAdd(clientUseId).split(":");
-        tcpGateIp = temp[0];
-        tcpGatePort = Integer.parseInt(temp[1]);
-        //2、与TCPGate建立长连接
-        connectToTCPGate();
-        //3、登录TCPGate
-        loginTcpGate();
-        //4、开启消息发送Loop
+        //建立连接
+        buildNewTcpConn();
+        //开启消息发送Loop
         loop.execute(this::scanAckListAndSend);
-        //5、开启消息接受Loop
+        //开启消息接受Loop
         loop.execute(this::pullNewMsg);
         //test
-        send(new C2CSendRequest("mytestclient","mytestclient",15L,16L,"pulltest"));
+        send(new C2CSendRequest("mytestclient","mytestclient",16L,17L,"pulltest"));
     }
 
     private void pullNewMsg(){
@@ -97,8 +90,8 @@ public class TcpClient {
                     }
                 });
             }else{
-                //防止消息丢失，每秒主动拉取一次新消息
-                if(timeCnt %10 == 0){
+                //防止消息丢失，每五秒主动拉取一次新消息
+                if(timeCnt %50 == 0){
                     channel.writeAndFlush(new PullRequest(clientUseId,maxAckMsgId.get()));
                 }
             }
@@ -131,6 +124,7 @@ public class TcpClient {
     }
 
     public void loginTcpGate(){
+
         sendMsg(new Login(clientUseId));
     }
     //对外接口
@@ -154,7 +148,7 @@ public class TcpClient {
     }
 
 
-    void connectToTCPGate(){
+    boolean connectToTCPGate() {
         bootstrap = new Bootstrap();
         bootstrap
                 .group(group)
@@ -178,21 +172,20 @@ public class TcpClient {
                         ;
                     }
                 });
-        retryCnt = 0;
-        bootstrap.connect(tcpGateIp,tcpGatePort).addListener((ChannelFuture f)->{
-            if(f.isSuccess()){
-                channel = f.channel();
-                retryCnt = 0;
-                log.info("连接成功");
-            }else{
-                if(retryCnt > clientRetry){
-                    log.info("连接重试超过3次，请稍后重试");
-                    return;
-                }
+            retryCnt = 0;
+        while(retryCnt < 3){
+            try {
+                ChannelFuture channelFuture = bootstrap.connect(tcpGateIp,tcpGatePort).sync();
+                channel = channelFuture.channel();
+                log.info("连接建立成功");
+                return true;
+            } catch (Exception e) {
+                log.info("尝试建立连接失败。。。第{}次",retryCnt+1);
                 retryCnt++;
-                connectToTCPGate();
             }
-        });
+        }
+        log.info("连接失败三次，请稍后再试");
+        return false;
     }
 
     void tryReconnect(){
@@ -200,7 +193,20 @@ public class TcpClient {
             return;
         }
         log.info("已断开连接，尝试重新建立连接，请稍等...");
-        start();
+
+        buildNewTcpConn();
+    }
+
+    void buildNewTcpConn(){
+        //1、获取TCPGate服务地址
+        String[] temp = ipConfigClient.getTcpGateAdd(clientUseId).split(":");
+        tcpGateIp = temp[0];
+        tcpGatePort = Integer.parseInt(temp[1]);
+        //2、与TCPGate建立长连接
+        if(connectToTCPGate()){
+            //3、登录TCPGate
+            loginTcpGate();
+        }
     }
 
     void close(){

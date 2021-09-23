@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -13,6 +14,7 @@ import java.net.UnknownHostException;
 @Slf4j
 @EnableDubbo
 @SpringBootApplication
+@ComponentScan(value = "com.potxxx.firstim.common")
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 public class CharServerApplication {
     public static void main(String[] args) {
