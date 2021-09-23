@@ -14,7 +14,7 @@
 5. 存储层DAS，对业务层提供存储接口，屏蔽底层存储逻辑
 6. 服务发现组件使用zookeeper，缓存组件使用redis，持久化存储使用mysql
 
-![Image text](https://github.com/potxxx/firstim/blob/main/image/架构图.jpg)
+![Image text](https://gitee.com/potxxx/firstim/raw/master/image/架构图.jpg)
 
 ## 三、业务逻辑设计
 1. 一对一聊天业务逻辑
@@ -27,7 +27,7 @@
 >7.logic收到拉取消息之后，将上一条状态设置为已送达，并给clientA返回已读  
 >8.若clientB从离线转换为在线之后，主动拉取新的消息
 
-![Image text](https://github.com/potxxx/firstim/blob/main/image/消息流转.jpg)
+![Image text](https://gitee.com/potxxx/firstim/raw/master/image/消息流转.jpg)
 
 
 2. 一对多聊天业务逻辑
@@ -63,7 +63,8 @@ id[自增ID]、msg_id[消息ID]、msg_from[发送者userid]、msg_to[接收者us
 * [x] 下行消息逻辑---拉取接口设计实现
 * [x] 一对一聊天业务实现
 * [x] 全局自增ID生成服务
-* [x] DB水平分表  
+* [x] DB水平分表
+* [ ] 消息推送
 * [ ] 抢红包服务
 * [ ] 朋友圈业务
 
