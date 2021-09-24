@@ -147,7 +147,6 @@ public class TcpClient {
         }
     }
 
-
     boolean connectToTCPGate() {
         bootstrap = new Bootstrap();
         bootstrap
@@ -173,7 +172,7 @@ public class TcpClient {
                     }
                 });
             retryCnt = 0;
-        while(retryCnt < 3){
+        while(retryCnt < clientRetry){
             try {
                 ChannelFuture channelFuture = bootstrap.connect(tcpGateIp,tcpGatePort).sync();
                 channel = channelFuture.channel();
@@ -184,7 +183,7 @@ public class TcpClient {
                 retryCnt++;
             }
         }
-        log.info("连接失败三次，请稍后再试");
+        log.info("尝试连接失败{}次，请稍后再试",clientRetry);
         return false;
     }
 
