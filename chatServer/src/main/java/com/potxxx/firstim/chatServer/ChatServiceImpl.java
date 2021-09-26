@@ -3,6 +3,7 @@ package com.potxxx.firstim.chatServer;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.potxxx.firstim.PO.Msg;
+import com.potxxx.firstim.common.RedisConstants;
 import com.potxxx.firstim.message.*;
 import com.potxxx.firstim.service.ChatService;
 import com.potxxx.firstim.service.DataService;
@@ -57,10 +58,18 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public C2CSendResponse c2cSendMsg(C2CSendRequest c2CSendRequest)  {
         //1、查询当前会话的cid最大值
-        Long latestCId = dataService.findLatestCIdByFromAndTo(c2CSendRequest.getFrom(), c2CSendRequest.getTo());
+        String key = RedisConstants.USERMAXCID+c2CSendRequest.getFrom()+"_"+c2CSendRequest.getTo();
+        Long latestCId;
+        if(redisTemplate.hasKey(key)){
+            latestCId = (Long) redisTemplate.opsForValue().get(key);
+        }else {
+            latestCId = dataService.findLatestCIdByFromAndTo(c2CSendRequest.getFrom(), c2CSendRequest.getTo());
+        }
         //2、与入参的preid相等或为第一条数据则入库返回ack
         if(latestCId == null || latestCId.equals(c2CSendRequest.getPreId())){
             if(dataService.insertC2CMsg(c2CSendRequest) != -1){
+                //删除缓存
+                redisTemplate.delete(key);
                 executorService.execute(()->{
                     //发送拉取消息
                     String addr = getUserWhere(c2CSendRequest.getTo());

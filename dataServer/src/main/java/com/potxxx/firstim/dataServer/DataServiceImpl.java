@@ -2,13 +2,10 @@ package com.potxxx.firstim.dataServer;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.potxxx.firstim.Enum.MsgType;
 import com.potxxx.firstim.PO.Msg;
 import com.potxxx.firstim.dataServer.Mapper.MsgMapper;
 import com.potxxx.firstim.message.C2CSendRequest;
-import com.potxxx.firstim.message.Login;
-import com.potxxx.firstim.service.ChatService;
 import com.potxxx.firstim.service.DataService;
 import com.potxxx.firstim.service.GenIDService;
 import org.springframework.beans.factory.annotation.Autowired;
