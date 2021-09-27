@@ -66,7 +66,7 @@ public class TcpClient {
     //ack队列
     ConcurrentHashMap<String, TreeMap<Long,Message>> ackMap = new ConcurrentHashMap<>();
 
-    private static Executor loop = Executors.newFixedThreadPool(2);
+    private static Executor loop = Executors.newFixedThreadPool(3);
 
     @PostConstruct
     public void start() {
@@ -77,7 +77,17 @@ public class TcpClient {
         //开启消息接受Loop
         loop.execute(this::pullNewMsg);
         //test
-        send(new C2CSendRequest("1","1",16L,17L,"pulltest"));
+        loop.execute(()->{
+            for(int i = 0;i<10;i++){
+                send(new C2CSendRequest("1","1",17L,18L,"pulltest2"));
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
     }
 
     private void pullNewMsg(){

@@ -10,6 +10,8 @@
         <module>chatServer</module>
         <module>dataServer</module>
         <module>genID</module>
+        <module>alarm</module>
+        <module>quartzJob</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

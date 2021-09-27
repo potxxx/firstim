@@ -12,6 +12,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -73,10 +74,11 @@ public class TcpGateServer {
                                 .addLast(new IdleStateHandler(readerIdleTimeSeconds,0,0))
                                 .addLast(new MessageLengthFieldFrameDecoder())
                                 .addLast(new MessageCoder())
-                                .addLast(new PingHandler())
+                                .addLast(new PingHandler(ChannelCache.map,redisTemplate))
                                 .addLast(new LoginHandler(serverAddr,redisTemplate,ChannelCache.map))
                                 .addLast(new C2CSendRequestHandler(chatService))
                                 .addLast(new PullRequestHandler(chatService))
+
                         ;
                     }
                 });

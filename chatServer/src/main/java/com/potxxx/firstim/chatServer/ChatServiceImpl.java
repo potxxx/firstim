@@ -61,9 +61,10 @@ public class ChatServiceImpl implements ChatService {
         String key = RedisConstants.USERMAXCID+c2CSendRequest.getFrom()+"_"+c2CSendRequest.getTo();
         Long latestCId;
         if(redisTemplate.hasKey(key)){
-            latestCId = (Long) redisTemplate.opsForValue().get(key);
+            latestCId = Long.parseLong((String) redisTemplate.opsForValue().get(key)) ;
         }else {
             latestCId = dataService.findLatestCIdByFromAndTo(c2CSendRequest.getFrom(), c2CSendRequest.getTo());
+            redisTemplate.opsForValue().set(key,latestCId);
         }
         //2、与入参的preid相等或为第一条数据则入库返回ack
         if(latestCId == null || latestCId.equals(c2CSendRequest.getPreId())){
