@@ -3,21 +3,17 @@ package com.potxxx.firstim.tcpGate;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.potxxx.firstim.message.MessageCoder;
 import com.potxxx.firstim.message.MessageLengthFieldFrameDecoder;
-import com.potxxx.firstim.messageHandler.C2CSendRequestHandler;
-import com.potxxx.firstim.messageHandler.LoginHandler;
-import com.potxxx.firstim.messageHandler.PingHandler;
-import com.potxxx.firstim.messageHandler.PullRequestHandler;
+import com.potxxx.firstim.messageHandler.*;
 import com.potxxx.firstim.service.ChatService;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +24,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.TreeSet;
 
 @Slf4j
 @Component
@@ -60,6 +55,8 @@ public class TcpGateServer {
         }
         boss = new NioEventLoopGroup();
         works = new NioEventLoopGroup();
+        EventExecutorGroup doGroup = new DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors()*2);
+
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(boss,works)
                 .channel(NioServerSocketChannel.class)
@@ -70,14 +67,14 @@ public class TcpGateServer {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         socketChannel.pipeline()
-                                //服务端在三倍客户端心跳时间未收到消息则主动断开连接
                                 .addLast(new IdleStateHandler(readerIdleTimeSeconds,0,0))
                                 .addLast(new MessageLengthFieldFrameDecoder())
                                 .addLast(new MessageCoder())
                                 .addLast(new PingHandler(ChannelCache.map,redisTemplate))
+                                .addLast(doGroup, new RateLimitHandler())
                                 .addLast(new LoginHandler(serverAddr,redisTemplate,ChannelCache.map))
-                                .addLast(new C2CSendRequestHandler(chatService))
-                                .addLast(new PullRequestHandler(chatService))
+                                .addLast(doGroup, new C2CSendRequestHandler(chatService))
+                                .addLast(doGroup, new PullRequestHandler(chatService))
 
                         ;
                     }

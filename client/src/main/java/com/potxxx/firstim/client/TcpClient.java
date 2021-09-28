@@ -77,17 +77,17 @@ public class TcpClient {
         //开启消息接受Loop
         loop.execute(this::pullNewMsg);
         //test
-        loop.execute(()->{
-            for(int i = 0;i<10;i++){
-                send(new C2CSendRequest("1","1",17L,18L,"pulltest2"));
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        });
+//        loop.execute(()->{
+//            for(int i = 0;i<1;i++){
+//                send(new C2CSendRequest("1","1",17L,18L,"pulltest2"));
+//                try {
+//                    TimeUnit.MILLISECONDS.sleep(500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//        });
     }
 
     private void pullNewMsg(){
